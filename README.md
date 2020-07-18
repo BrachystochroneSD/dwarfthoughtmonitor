@@ -11,7 +11,6 @@ GPLv3
 
 ## Screenshots
 ![screenshot](screens/screen1.png "screenshot")
-[screens/screen1.png]
 
 ## Compatibility
 This tool should work for python version > 2.7.
