@@ -1,27 +1,26 @@
 # Dwarf Thought Monitor
 
-Dwarf Thought Monitor is a standalone python utilities forked from [NuAoA's AnnouncementWindow+](https://github.com/NuAoA/AnnouncementWindow) (not maintained) to monitor easily with the help of custom mades filters, word coloring and icons the announcements and reports of your Fortress and the thoughts of your beloved dwarves
+Dwarf Thought Monitor is a standalone python utilities forked from [NuAoA's AnnouncementWindow+](https://github.com/NuAoA/AnnouncementWindow) (which is not maintained anymore) to monitor easily the announcements and reports of your Fortress and the thoughts of your beloved dwarves with the help of **customizable** filters, word coloring and icons (will be implemented soon).
 
-You can edit the type of announcements that are shown in the two separate displays. For example, the first window could be set up to show announcements (```a```) and the other could show a live feed of your combat reports (```r```). No more pausing the game!
-
-You can also configure the font/size/color of the announcements (by right clicking on either display), and with a basic understanding of [regular expressions](https://docs.python.org/2/library/re.html) you can even create your own custom filters!
-
-## License
-GPLv3
+The main features are
+   - Show different type of announcements in separate displays
+   - Customize announcement type color with [regular expressions](https://docs.python.org/2/library/re.html) .
+   - Set customizable colors for specific words to quickly highlight what matter (thoughts, megabeasts, etc.)
+   - Set customizable icons for specific words. (COMING SOON)
 
 ## Screenshots
 ![screenshot](screens/screen1.png "screenshot")
 
 ## Compatibility
-This tool should work for python version > 2.7.
+Should run on Python 2.7.+ and 3.2+.
 
-## Configuration
+## Install
 
-### **Install**
-
-For windows: Download the release (https://github.com/BrachystochroneSD/dwarfthoughtmonitor-git/releases), unzip and run the executable.
+For Windows users: Download the release (https://github.com/BrachystochroneSD/dwarfthoughtmonitor-git/releases), unzip and run the executable. (Not working right now, need to clean up some things before)
 
 For UNIX-like system: Download the source-code and run with ```python -m dtm``` or launch ```DwarfThoughtMonitor.sh``` shell executable
+
+## Configuration
 
 ### **Setup**
 
