@@ -10,7 +10,7 @@ You can also configure the font/size/color of the announcements (by right clicki
 GPLv3
 
 ## Screenshots
-
+![screenshot](screens/screen1.png "screenshot")
 [screens/screen1.png]
 
 ## Compatibility
