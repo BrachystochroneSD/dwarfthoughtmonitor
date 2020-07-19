@@ -166,7 +166,7 @@ class main_gui(Tkinter.Tk):
     def __init__(self):
         Tkinter.Tk.__init__(self)
         self.iconbitmap(Config.settings.icon_path)
-        self.title("Announcement Window+")
+        self.title("Dwarf Thought Monitor")
         self.protocol('WM_DELETE_WINDOW', self.clean_exit)
         self.pack_propagate(False)
         self.config(bg="Gray", height=700, width=640)
