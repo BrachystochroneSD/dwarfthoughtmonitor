@@ -1,11 +1,11 @@
 import sys
 if sys.version_info.major == 2:
-    import Tkinter
+    import Tkinter as tk
     import tkFileDialog
     import tkColorChooser
     import tkFont
 elif  sys.version_info.major == 3:
-    import tkinter as Tkinter
+    import tkinter as tk
     import tkinter.filedialog as tkFileDialog
     import tkinter.colorchooser as tkColorChooser
     import tkinter.font as tkFont
@@ -25,15 +25,14 @@ import dtm.core.game_log_reader as GamelogReader
 import dtm.core.config as Config
 import dtm.core.util as util
 
-
 # import psutil,time
 
 def dict_to_font(dict_):
     return tkFont.Font(family=dict_["family"], size=dict_["size"], weight=dict_["weight"], slant=dict_["slant"], overstrike=dict_["overstrike"], underline=dict_["underline"])
 
-class announcement_window(Tkinter.Frame):
+class announcement_window(tk.Frame):
     def __init__(self, parent, id_):
-        Tkinter.Frame.__init__(self, parent)
+        tk.Frame.__init__(self, parent)
         self.parent = parent
         self.id = id_
         self.show_tags = False
@@ -46,8 +45,8 @@ class announcement_window(Tkinter.Frame):
         self.init_pulldown()
 
     def init_text_window(self):
-        self.text = Tkinter.Text(self, bg="black", wrap="word", font=self.customFont)
-        self.vsb = Tkinter.Scrollbar(self, orient="vertical", command=self.text.yview)
+        self.text = tk.Text(self, bg="black", wrap="word", font=self.customFont)
+        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.text.yview)
         self.text.configure(yscrollcommand=self.vsb.set)
         self.vsb.pack(side="right", fill="y")
         self.text.config(cursor="")
@@ -69,7 +68,7 @@ class announcement_window(Tkinter.Frame):
         self.yview = self.text.yview
 
     def init_pulldown(self):
-        self.pulldown = Tkinter.Menu(self, tearoff=0)
+        self.pulldown = tk.Menu(self, tearoff=0)
         bg = "white"
         if util.platform.win or util.platform.osx:
             bg = "SystemMenu"
@@ -162,9 +161,30 @@ class announcement_window(Tkinter.Frame):
                 index = int(float(self.text.index('%s.first' % tag_name)))
                 self.delete("%d.0" % index, "%d.0" % (index + 1))
 
-class main_gui(Tkinter.Tk):
+class TagPanel(tk.Frame):
+    def __init__(self, parent, id, test="Tags"):
+        tk.Frame.__init__(self, parent)
+
+        self.parent = parent
+        self.id_=id
+
+        self.is_shown = False
+
+        self.tag_frame = tk.Frame(self)
+        title_frame = tk.Frame(self.tag_frame)
+        frame = tk.Frame(title_frame)
+
+        self.toggle_button = tk.Button(self, text="<", command=self.toggle_expand)
+        self.toggle_button.grid(column=0, row=0, sticky=tk.N+tk.S)
+        self.toggle_button.grid_rowconfigure(0,weight=1)
+
+    def toggle_expand(self):
+        print("TODO")
+
+
+class main_gui(tk.Tk):
     def __init__(self):
-        Tkinter.Tk.__init__(self)
+        tk.Tk.__init__(self)
         self.iconbitmap(Config.settings.icon_path)
         self.title("Dwarf Thought Monitor")
         self.protocol('WM_DELETE_WINDOW', self.clean_exit)
@@ -175,6 +195,7 @@ class main_gui(Tkinter.Tk):
         self.gamelog = GamelogReader.gamelog()
         self.connect()
         self.announcement_windows = OrderedDict([])
+        self.tag_panels = OrderedDict([])
         self.cpu_max = {}
         self.py = None
         if self.gui_data is None:
@@ -188,16 +209,16 @@ class main_gui(Tkinter.Tk):
         self.pack_announcements()
 
     def init_menu(self):
-        self.menu = Tkinter.Menu(self, tearoff=0)
+        self.menu = tk.Menu(self, tearoff=0)
 
-        options_menu = Tkinter.Menu(self.menu, tearoff=0)
+        options_menu = tk.Menu(self.menu, tearoff=0)
         options_menu.add_command(label="Filter Configuration", command=self.config_gui)
         options_menu.add_command(label="Edit filters.txt", command=self.open_filters)
         options_menu.add_command(label="Reload wordcolor.txt", command=WordColor.wd.reload)
         options_menu.add_command(label="Reload filters.txt", command=Filters.expressions.reload)
         options_menu.add_command(label="Reload Settings", command=self.reload_settings)
 
-        self.settings_menu = Tkinter.Menu(self.menu, tearoff=0)
+        self.settings_menu = tk.Menu(self.menu, tearoff=0)
         self.settings_menu.add_command(label="Set Directory", command=self.askpath)
         self.settings_menu.add_command(label="Lock Window", command=self.lock_window)
         self.menu.add_cascade(label="Settings", menu=self.settings_menu)
@@ -212,22 +233,27 @@ class main_gui(Tkinter.Tk):
             # TODO: add dialog when gamelog is not found
             pass
 
-    def dump_info(self):
-        print('CPU-MAX:%f' % max(self.cpu_max["CPU"]))
-        print('CPU-AVG:%f' % (sum(self.cpu_max["CPU"]) / len(self.cpu_max["CPU"])))
+    # def dump_info(self):
+    #     print('CPU-MAX:%f' % max(self.cpu_max["CPU"]))
+    #     print('CPU-AVG:%f' % (sum(self.cpu_max["CPU"]) / len(self.cpu_max["CPU"])))
 
-        print('MEM-MAX:%f MB' % max(self.cpu_max["MEM"]))
-        print('MEM-AVG:%f MB' % (sum(self.cpu_max["MEM"]) / len(self.cpu_max["MEM"])))
-        self.cpu_max["CPU"] = []
-        self.cpu_max["MEM"] = []
+    #     print('MEM-MAX:%f MB' % max(self.cpu_max["MEM"]))
+    #     print('MEM-AVG:%f MB' % (sum(self.cpu_max["MEM"]) / len(self.cpu_max["MEM"])))
+    #     self.cpu_max["CPU"] = []
+    #     self.cpu_max["MEM"] = []
 
     def init_windows(self):
-        self.panel = Tkinter.PanedWindow(self, orient="vertical", sashwidth=5)
+        self.panel = tk.PanedWindow(self, orient="vertical", sashwidth=5)
         self.panel.pack(fill="both", expand=1)
+
         for i in range(0, 2):
             self.announcement_windows[i] = announcement_window(self, i)
-        self.panel.add(self.announcement_windows[0])
-        self.panel.add(self.announcement_windows[1])
+            self.tag_panels[i] = TagPanel(self, i)
+
+            subpanel.add(self.announcement_windows[i])
+            subpanel.add(self.tag_panels[i])
+            self.panel.add(subpanel)
+
         self.panel.update_idletasks()
         self.panel.sash_place(0, 0, self.gui_data["sash_place"])  # TODO: update to support multiple sashes
 
@@ -301,26 +327,6 @@ class main_gui(Tkinter.Tk):
             announcement_win[1].text.pack(side="top", fill="both", expand=True)
             # Why doesn't this always move to the end when you launch with setting: load_previous_announcements = True  ??
             announcement_win[1].yview("end")
-
-    #===========================================================================
-    # def parallel(self): #TODO: remove
-    #     def find_process():
-    #         for pid in psutil.pids():
-    #             if psutil.Process(pid).name() == "python.exe":
-    #                 if abs(psutil.Process(pid).create_time()-time.time()) < 5:
-    #                     #was made less than 5 seconds ago
-    #                     return psutil.Process(pid)
-    #     if self.py is None:
-    #         self.py = find_process()
-    #         self.cpu_max["CPU"] = []
-    #         self.cpu_max["MEM"] = []
-    #         self.py.cpu_percent()
-    #     else:
-    #         self.cpu_max["MEM"].append(self.py.memory_info().rss/(1000*1024))
-    #         self.cpu_max["CPU"].append(self.py.cpu_percent())
-    #     self.after(5000,self.parallel)
-    #
-    #===========================================================================
 
 if __name__ == "__main__":
     app = main_gui()
