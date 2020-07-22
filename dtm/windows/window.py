@@ -168,19 +168,44 @@ class TagPanel(tk.Frame):
         self.parent = parent
         self.id_=id
 
-        self.is_shown = False
+        self.is_expanded = False
 
-        self.tag_frame = tk.Frame(self)
-        title_frame = tk.Frame(self.tag_frame)
-        frame = tk.Frame(title_frame)
+        self.grid(row=0, column=0, columnspan=4)
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
 
-        self.toggle_button = tk.Button(self, text="<", command=self.toggle_expand)
-        self.toggle_button.grid(column=0, row=0, sticky=tk.N+tk.S)
-        self.toggle_button.grid_rowconfigure(0,weight=1)
+        self.toggle_button = tk.Button(self, text="<", width=1, command=self.toggle_expand, padx=1)
+        self.toggle_button.grid(column=0, row=0, sticky="wns")
+
+        self.subframe = tk.Frame(self, relief="sunken", borderwidth=1)
+        self.subframe.grid(row=0, column=1, columnspan=3)
+
+        self.subframe.grid_forget()
+
+        # TESTING ONLY
+        labeltest = tk.Label(self.subframe, text="Boo!")
+        labeltest.grid(row=0, column=1)
 
     def toggle_expand(self):
-        print("TODO")
+        if not self.is_expanded:
+            self.expand()
+        else:
+            self.collapse()
+        self.is_expanded = not self.is_expanded
 
+    def expand(self):
+        curr_width = self.parent.subpanels[self.id_].winfo_width()
+        self.subframe.grid(row=0, column=1, columnspan=3)
+        self.toggle_button.config(text= ">")
+        self.parent.subpanels[self.id_].sash_place(0,int(2/3 * curr_width),1)
+
+    def collapse(self):
+        curr_width = self.parent.subpanels[self.id_].winfo_width()
+        self.subframe.grid_forget()
+        self.toggle_button.config(text= "<")
+        self.parent.subpanels[self.id_].sash_place(0,int(curr_width) - 20,1)
 
 class main_gui(tk.Tk):
     def __init__(self):
@@ -196,6 +221,7 @@ class main_gui(tk.Tk):
         self.connect()
         self.announcement_windows = OrderedDict([])
         self.tag_panels = OrderedDict([])
+        self.subpanels = OrderedDict([])
         self.cpu_max = {}
         self.py = None
         if self.gui_data is None:
@@ -243,19 +269,33 @@ class main_gui(tk.Tk):
     #     self.cpu_max["MEM"] = []
 
     def init_windows(self):
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
         self.panel = tk.PanedWindow(self, orient="vertical", sashwidth=5)
-        self.panel.pack(fill="both", expand=1)
+        self.panel.grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0,weight=1)
+        self.grid_columnconfigure(0,weight=1)
 
         for i in range(0, 2):
-            self.announcement_windows[i] = announcement_window(self, i)
-            self.tag_panels[i] = TagPanel(self, i)
+            curr_subpanel = tk.PanedWindow(self.panel, orient="horizontal", sashcursor="arrow")
+            ann_win = announcement_window(self, i)
+            tag_win = TagPanel(self, i)
 
-            subpanel.add(self.announcement_windows[i])
-            subpanel.add(self.tag_panels[i])
-            self.panel.add(subpanel)
+            self.announcement_windows[i] = ann_win
+            self.tag_panels[i] = tag_win
+            self.subpanels[i] = curr_subpanel
+
+            curr_subpanel.add(ann_win, stretch="always")
+            curr_subpanel.add(tag_win)
+            self.panel.add(curr_subpanel)
 
         self.panel.update_idletasks()
+        # place sashed
         self.panel.sash_place(0, 0, self.gui_data["sash_place"])  # TODO: update to support multiple sashes
+        curr_width = self.panel.winfo_width()
+        self.subpanels[0].sash_place(0,int(curr_width) - 20,1)
+        self.subpanels[1].sash_place(0,int(curr_width) - 20,1)
 
     def gen_tags(self):
         Filters.expressions.reload()
