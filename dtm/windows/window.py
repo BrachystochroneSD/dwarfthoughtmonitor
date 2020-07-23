@@ -180,13 +180,52 @@ class TagPanel(tk.Frame):
         self.toggle_button.grid(column=0, row=0, sticky="wns")
 
         self.subframe = tk.Frame(self, relief="sunken", borderwidth=1)
-        self.subframe.grid(row=0, column=1, columnspan=3)
-
+        self.subframe.grid(row=0, column=1, sticky="nsew")
         self.subframe.grid_forget()
 
-        # TESTING ONLY
-        labeltest = tk.Label(self.subframe, text="Boo!")
-        labeltest.grid(row=0, column=1)
+        Filters.expressions.reload() # reload expressions to get the colors
+
+        for i, group_ in enumerate(Filters.expressions.groups.items()):
+            group_name = group_[0]
+            group = group_[1]
+            group_frame = tk.Frame(self.subframe)
+            group_frame.grid(row=i,column=0)
+
+            # Inside group_frame vv
+            group_label = tk.Label(group_frame, text=group_name, anchor="w")
+            group_color_button = tk.Button(group_frame, text="", command=lambda : self.color_picker(group_color_button, group), relief="sunken", activebackground=group.color, background=group.color, height=0, width=0, padx=2, pady=2, cursor="pencil")
+            group_tggl_cb = tk.Checkbutton(group_frame)
+            categories_frame = tk.Frame(group_frame)
+            group_label.grid(row=0, column=0, columnspan=2, sticky="ew")
+            group_color_button.grid(row=0, column=2, sticky="e")
+            group_tggl_cb.grid(row=0, column=3)
+            categories_frame.grid(row=1, column=0)
+            #inside categories_frame vv
+            for j, category_ in enumerate(group.categories.items()):
+                category_name = category_[0]
+                category = category_[1]
+                category_shown = category.get_show(self.id_)
+                category_label = tk.Label(categories_frame, text=category_name, anchor="e", relief="sunken")
+                category_tggl_cb = tk.Checkbutton(categories_frame)
+                if category_shown:
+                    category_tggl_cb.select()
+                category_tggl_cb.config(command=lambda : self.category_toggle(category, category_shown))
+                category_label.grid(row=j, column=0)
+                category_tggl_cb.grid(row=j, column=1)
+
+    def category_toggle(self, category, shown):
+        category.set_show(self.id_, not shown)
+
+    def group_toggle(self, group):
+        for show_ in group.category.show.items():
+            print(TODO)
+
+
+    def color_picker(self, button, group):
+        new_color = tkColorChooser.askcolor()[1]
+        if new_color is not None:
+            button.config(background=new_color)
+            group.set_color(new_color)
 
     def toggle_expand(self):
         if not self.is_expanded:
