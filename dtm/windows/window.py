@@ -170,48 +170,68 @@ class TagPanel(tk.Frame):
 
         self.is_expanded = False
 
-        self.grid(row=0, column=0, columnspan=4)
+        self.grid(row=0, column=0)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
 
         self.toggle_button = tk.Button(self, text="<", width=1, command=self.toggle_expand, padx=1)
         self.toggle_button.grid(column=0, row=0, sticky="wns")
 
-        self.subframe = tk.Frame(self, relief="sunken", borderwidth=1)
-        self.subframe.grid(row=0, column=1, sticky="nsew")
-        self.subframe.grid_forget()
+        self.collapsible_frame = tk.Frame(self, relief="sunken", borderwidth=1)
+        self.collapsible_frame.grid(row=0, column=1, sticky="nsew")
+        self.collapsible_frame.grid_forget()
 
         Filters.expressions.reload() # reload expressions to get the colors
 
+        self.init_sub_frame()
+
+    def init_sub_frame(self):
+        self.canvas = tk.Canvas(self.collapsible_frame, borderwidth=0, width=168)
+        self.canvas_frame = tk.Frame(self.canvas, borderwidth=0)
+        self.vsb = tk.Scrollbar(self.collapsible_frame, orient="vertical", command=self.canvas.yview)
+
+        self.group_frame_init()
+
+        self.canvas.configure(yscrollcommand=self.vsb.set)
+        self.vsb.grid(row=1, column=2, sticky="ns")
+        self.canvas.grid(row=1, column=1 ,sticky="nsew")
+        self.canvas.create_window((0, 0), window=self.canvas_frame, anchor='nw')
+        self.canvas.update_idletasks()
+        self.resize()
+
+    def resize(self):
+        self.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox('all'))
+        self.config(width=self.canvas.winfo_width())
+
+    def group_frame_init(self):
         for i, group_ in enumerate(Filters.expressions.groups.items()):
             group_name = group_[0]
             group = group_[1]
-            group_frame = tk.Frame(self.subframe)
+            group_frame = tk.Frame(self.canvas_frame)
             group_frame.grid(row=i,column=0)
 
             # Inside group_frame vv
             group_label = tk.Label(group_frame, text=group_name, anchor="w")
             group_color_button = tk.Button(group_frame, text="", command=lambda : self.color_picker(group_color_button, group), relief="sunken", activebackground=group.color, background=group.color, height=0, width=0, padx=2, pady=2, cursor="pencil")
             group_tggl_cb = tk.Checkbutton(group_frame)
-            categories_frame = tk.Frame(group_frame)
             group_label.grid(row=0, column=0, columnspan=2, sticky="ew")
             group_color_button.grid(row=0, column=2, sticky="e")
             group_tggl_cb.grid(row=0, column=3)
-            categories_frame.grid(row=1, column=0)
-            #inside categories_frame vv
-            for j, category_ in enumerate(group.categories.items()):
-                category_name = category_[0]
-                category = category_[1]
-                category_shown = category.get_show(self.id_)
-                category_label = tk.Label(categories_frame, text=category_name, anchor="e", relief="sunken")
-                category_tggl_cb = tk.Checkbutton(categories_frame)
-                if category_shown:
-                    category_tggl_cb.select()
-                category_tggl_cb.config(command=lambda : self.category_toggle(category, category_shown))
-                category_label.grid(row=j, column=0)
-                category_tggl_cb.grid(row=j, column=1)
+            # categories_frame = tk.Frame(group_frame)
+            # categories_frame.grid(row=1, column=0)
+            # #inside categories_frame vv
+            # for j, category_ in enumerate(group.categories.items()):
+            #     category_name = category_[0]
+            #     category = category_[1]
+            #     category_shown = category.get_show(self.id_)
+            #     category_label = tk.Label(categories_frame, text=category_name, anchor="e", relief="sunken")
+            #     category_tggl_cb = tk.Checkbutton(categories_frame)
+            #     if category_shown:
+            #         category_tggl_cb.select()
+            #     category_tggl_cb.config(command=lambda : self.category_toggle(category, category_shown))
+            #     category_label.grid(row=j, column=0)
+            #     category_tggl_cb.grid(row=j, column=1)
 
     def category_toggle(self, category, shown):
         category.set_show(self.id_, not shown)
@@ -236,13 +256,13 @@ class TagPanel(tk.Frame):
 
     def expand(self):
         curr_width = self.parent.subpanels[self.id_].winfo_width()
-        self.subframe.grid(row=0, column=1, columnspan=3)
+        self.collapsible_frame.grid(row=0, column=1, columnspan=3)
         self.toggle_button.config(text= ">")
         self.parent.subpanels[self.id_].sash_place(0,int(2/3 * curr_width),1)
 
     def collapse(self):
         curr_width = self.parent.subpanels[self.id_].winfo_width()
-        self.subframe.grid_forget()
+        self.collapsible_frame.grid_forget()
         self.toggle_button.config(text= "<")
         self.parent.subpanels[self.id_].sash_place(0,int(curr_width) - 20,1)
 
