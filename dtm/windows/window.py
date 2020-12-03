@@ -179,6 +179,9 @@ class TagPanel(tk.Frame):
 
         self.collapsible_frame = tk.Frame(self, relief="sunken", borderwidth=1)
         self.collapsible_frame.grid(row=0, column=1, sticky="nsew")
+        self.collapsible_frame.rowconfigure(0, weight=1)
+        self.collapsible_frame.columnconfigure(0, weight=1)
+        self.collapsible_frame.columnconfigure(1, weight=1)
         self.collapsible_frame.grid_forget()
 
         Filters.expressions.reload() # reload expressions to get the colors
@@ -196,6 +199,7 @@ class TagPanel(tk.Frame):
         self.vsb.grid(row=1, column=2, sticky="ns")
         self.canvas.grid(row=1, column=1 ,sticky="nsew")
         self.canvas.create_window((0, 0), window=self.canvas_frame, anchor='nw')
+        self.canvas_frame.grid() #HEHRE TODO
         self.canvas.update_idletasks()
         self.resize()
 
@@ -210,11 +214,12 @@ class TagPanel(tk.Frame):
             group = group_[1]
             group_frame = tk.Frame(self.canvas_frame)
             group_frame.grid(row=i,column=0)
+            group_frame.columnconfigure(0, weight=1)
 
             # Inside group_frame vv
             group_label = tk.Label(group_frame, text=group_name, anchor="w")
             group_color_button = tk.Button(group_frame, text="", command=lambda : self.color_picker(group_color_button, group), relief="sunken", activebackground=group.color, background=group.color, height=0, width=0, padx=2, pady=2, cursor="pencil")
-            group_tggl_cb = tk.Checkbutton(group_frame)
+            group_tggl_cb = tk.Checkbutton(group_frame, anchor="e")
             group_label.grid(row=0, column=0, columnspan=2, sticky="ew")
             group_color_button.grid(row=0, column=2, sticky="e")
             group_tggl_cb.grid(row=0, column=3)
